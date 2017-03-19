@@ -28,4 +28,8 @@ extension String {
         let endIndex = index(from: r.upperBound)
         return substring(with: startIndex..<endIndex)
     }
+
+    func trim() -> String {
+        return self.trimmingCharacters(in: CharacterSet.whitespacesAndNewlines)
+    }
 }
