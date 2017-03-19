@@ -26,6 +26,7 @@ struct Link: CustomStringConvertible {
         // #### 3.3.2. 文件命名
         // depth = 4
         // text = "3.3.2. 文件命名"
+        // hash = "332-文件命名"
         var pos = 0;
         for a in linkString.characters {
             if a == "#" {
@@ -37,10 +38,37 @@ struct Link: CustomStringConvertible {
 
         depth = pos
         text = linkString.substring(with: pos..<linkString.characters.count).trim()
+        hash = convertLink(text)
     }
 
+    // CustomStringConvertible Protocal
     var description: String {
         return "Link with depth:\(depth) text:\(text)"
+    }
+
+    // 转化为URL
+    // .,/ 中文括号等各类字符 => DEL
+    // 空格 => -
+    // 字母转化为小写
+    // 其它不处理
+    func convertLink(_ inputText:String) -> String {
+        let origin = inputText.lowercased()
+        var output = "";
+        for a in origin.characters {
+            var append = "";
+            switch a {
+            case " ":
+                append = "-"
+            case ".", ",", "/", "）", "（", "”", "“", "#", "<", ">":
+                append = ""
+            default:
+                append = String(a)
+            }
+
+            output += append;
+        }
+
+        return output
     }
 }
 
@@ -90,9 +118,10 @@ func buildContent(links: [Link]) -> String {
     var content = ""
     for link in links {
         if link.depth == 1 {
-            content += "\r\n"
+            //content += "\r\n"
         } else if link.depth == 2 {
-            content += "\r\n　　"
+            //content += "\r\n　　"
+            content += "\r\n"
         } else {
             var tmpDepth = link.depth
             repeat {
