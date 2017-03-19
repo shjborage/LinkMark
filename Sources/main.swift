@@ -23,6 +23,7 @@ struct Link: CustomStringConvertible {
     var hash = ""
 
     init(_ linkString: String) {
+        print(linkString)
         // #### 3.3.2. 文件命名
         // depth = 4
         // text = "3.3.2. 文件命名"
@@ -43,7 +44,7 @@ struct Link: CustomStringConvertible {
 
     // CustomStringConvertible Protocal
     var description: String {
-        return "Link with depth:\(depth) text:\(text)"
+        return "Link with depth:\(depth) text:\(text) hash:\(hash)"
     }
 
     // 转化为URL
@@ -59,7 +60,7 @@ struct Link: CustomStringConvertible {
             switch a {
             case " ":
                 append = "-"
-            case ".", ",", "/", "）", "（", "”", "“", "#", "<", ">":
+            case ".", ",", "/", "）", "（", "”", "“", "#", "<", ">", "\"":
                 append = ""
             default:
                 append = String(a)
@@ -104,6 +105,7 @@ func getLinks(_ content: String) -> [Link] {
             let start = linkMatch.range.location
             let end = linkMatch.range.location + linkMatch.range.length
             let linkString = content.substring(with: start..<end)
+            //print(linkString)
             let link = Link(linkString)
             array.append(link)
             //print(link)
@@ -118,18 +120,19 @@ func buildContent(links: [Link]) -> String {
     var content = ""
     for link in links {
         if link.depth == 1 {
-            //content += "\r\n"
+            //content += "\n"
         } else if link.depth == 2 {
-            //content += "\r\n　　"
-            content += "\r\n"
+            //content += "\n　　"
+            content += "\n"
         } else {
             var tmpDepth = link.depth
             repeat {
                 content += "　　"
                 tmpDepth -= 1
-            } while (tmpDepth > 1)
+            } while (tmpDepth > 2)
+            //} while (tmpDepth > 1)
         }
-        content += "[\(link.text)](#\(link.hash))  \r\n"
+        content += "[\(link.text)](#\(link.hash))  \n"
     }
     return content
 }
@@ -141,7 +144,15 @@ if let filePathValue = filePath.value {
     let linkContent = buildContent(links: links)
     //print("File path is \(filePathValue), with content : \(fileContent)")
     //print(links)
-    print(linkContent)
+    //print(linkContent)
+    print("Put link to head of the File ...")
+    let newFile = linkContent + fileContent
+    do {
+        try newFile.write(toFile:filePathValue, atomically:true, encoding:.utf8)
+        print("Done!")
+    } catch {
+        print("Write to file with error:\(error)")
+    }
 } else {
     // end of cli
 }
